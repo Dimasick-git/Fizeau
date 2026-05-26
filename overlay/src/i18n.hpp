@@ -62,7 +62,16 @@ namespace str {
     // ── Presets screen ────────────────────────────────────────────────────────
     inline const char* PRESETS_TITLE()     { return T("Пресеты цвета",    "Color Presets"); }
     inline const char* SAVE_CURRENT()      { return T("Сохранить текущие","Save Current"); }
-    inline const char* APPLY_PRESET()      { return T("Применить",        "Apply"); }
+    inline const char* APPLY_PRESET()      { return T("A: применить",     "A: apply"); }
+    inline const char* APPLY_DEL_PRESET()  { return T("A: применить  X: удалить", "A: apply  X: delete"); }
     inline const char* BUILTIN_LABEL()     { return T("Встроенные",       "Built-in"); }
     inline const char* CUSTOM_LABEL()      { return T("Пользовательские", "Custom"); }
+
+    // ── Components / Filter labels ────────────────────────────────────────────
+    inline const char* COMP_NONE()        { return T("Нет",           "None"); }
+    inline const char* COMP_ALL()         { return T("Все",           "All"); }
+    inline const char* FILTER_NONE()      { return T("Нет",           "None"); }
+    inline const char* FILTER_RED()       { return T("Красный",       "Red"); }
+    inline const char* FILTER_GREEN()     { return T("Зелёный",       "Green"); }
+    inline const char* FILTER_BLUE()      { return T("Синий",         "Blue"); }
 } // namespace str

@@ -165,7 +165,7 @@ public:
             for (std::size_t i = 0; i < g_presets.custom.size(); ++i) {
                 const auto &p = g_presets.custom[i];
                 auto* btn = new tsl::elm::ListItem(p.name);
-                btn->setValue(str::APPLY_PRESET());
+                btn->setValue(str::APPLY_DEL_PRESET());
                 btn->setClickListener([this, i](std::uint64_t keys) {
                     if (keys & HidNpadButton_A) {
                         if (i < g_presets.custom.size())
@@ -173,7 +173,7 @@ public:
                         tsl::goBack();
                         return true;
                     }
-                    if (keys & HidNpadButton_Y) {
+                    if (keys & HidNpadButton_X) {
                         g_presets.removeCustom(i);
                         tsl::changeTo<PresetsGui>(this->day_settings, this->night_settings, this->is_day, this->config);
                         return true;
@@ -814,7 +814,8 @@ public:
         });
 
         // Components
-        this->components_bar = new tsl::elm::NamedStepTrackBar("", { "None", "R", "G", "RG", "B", "RB", "GB", "All" });
+        this->components_bar = new tsl::elm::NamedStepTrackBar("", {
+            str::COMP_NONE(), "R", "G", "RG", "B", "RB", "GB", str::COMP_ALL() });
         this->components_bar->setProgress(static_cast<u8>(this->config.profile.components));
         this->components_bar->setClickListener([this](std::uint64_t keys) {
             if (keys & HidNpadButton_Y) {
@@ -832,7 +833,8 @@ public:
         });
 
         // Filter
-        this->filter_bar = new tsl::elm::NamedStepTrackBar("", { "None", "Red", "Green", "Blue" });
+        this->filter_bar = new tsl::elm::NamedStepTrackBar("", {
+            str::FILTER_NONE(), str::FILTER_RED(), str::FILTER_GREEN(), str::FILTER_BLUE() });
         this->filter_bar->setProgress((this->config.profile.filter == Component_None) ? 0 : std::countr_zero(static_cast<std::uint32_t>(this->config.profile.filter)) + 1);
         this->filter_bar->setClickListener([this](std::uint64_t keys) {
             if (keys & HidNpadButton_Y) {
@@ -927,12 +929,12 @@ public:
         });
         this->range_button->setValue(is_full(this->is_day ? this->config.profile.day_settings.range : this->config.profile.night_settings.range) ? str::FULL() : str::LIMITED());
 
-        // Language toggle (RU ↔ EN)
+        // Language toggle (RU ↔ EN) — rebuilds full UI so all strings update
         auto* lang_button = new tsl::elm::ListItem(str::LANGUAGE());
-        lang_button->setClickListener([lang_button](std::uint64_t keys) {
+        lang_button->setClickListener([](std::uint64_t keys) {
             if (keys & HidNpadButton_A) {
                 g_lang = (g_lang == Lang::RU) ? Lang::EN : Lang::RU;
-                lang_button->setText(str::LANGUAGE());
+                tsl::changeTo<FizeauOverlayGui>();
                 return true;
             }
             return false;
