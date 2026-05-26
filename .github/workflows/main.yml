@@ -1,0 +1,56 @@
+name: Build & Release
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: devkitpro/devkita64:latest
+
+    steps:
+      - name: Install 7z
+        run: apt-get update -qq && apt-get install -y p7zip-full
+
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build common library
+        run: make -C common -j$(nproc)
+
+      - name: Build distribution package
+        run: make dist -j$(nproc)
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Fizeau
+          path: out/Fizeau-*.zip
+          if-no-files-found: error
+
+  release:
+    name: Create GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Fizeau
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Fizeau-*.zip
+          generate_release_notes: true
+          name: "Fizeau ${{ github.ref_name }}"
+          fail_on_unmatched_files: true
