@@ -37,7 +37,7 @@ $(DIST_TARGET): | all
 	@cp application/out/Fizeau.nro $(OUT)/switch/Fizeau/Fizeau.nro
 
 	@mkdir -p $(OUT)/switch/.overlays
-	@cp overlay/out/Fizeau.ovl $(OUT)/switch/.overlays/Fizeau.ovl
+	@cp overlay/Fizeau.ovl $(OUT)/switch/.overlays/Fizeau.ovl
 
 	@mkdir -p $(OUT)/atmosphere/contents/$(FZ_TID)/flags
 	@cp sysmodule/out/Fizeau.nsp $(OUT)/atmosphere/contents/$(FZ_TID)/exefs.nsp
