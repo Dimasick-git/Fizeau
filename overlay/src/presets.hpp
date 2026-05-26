@@ -102,7 +102,7 @@ public:
 
     // All presets: built-in first, then custom
     std::vector<FzPreset> all() const {
-        std::vector<FzPreset> result(BUILTIN_PRESETS.begin(), BUILTIN_PRESETS.end());
+        auto result = getBuiltinPresets();
         result.insert(result.end(), this->custom.begin(), this->custom.end());
         return result;
     }
