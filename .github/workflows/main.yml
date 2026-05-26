@@ -33,7 +33,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Fizeau
-          path: out/Fizeau-*.zip
+          path: out/Fizeau.zip
           if-no-files-found: error
 
   release:
@@ -54,7 +54,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: Fizeau-*.zip
+          files: Fizeau.zip
           generate_release_notes: true
           name: "Fizeau ${{ github.ref_name }}"
           fail_on_unmatched_files: true
@@ -63,8 +63,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          files: Fizeau-*.zip
+          files: Fizeau.zip
           tag_name: latest
           name: "Fizeau (latest build)"
-          prerelease: true
           fail_on_unmatched_files: true

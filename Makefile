@@ -14,7 +14,7 @@ ifneq (, $(strip $(shell git status --porcelain 2>/dev/null)))
 export FZ_COMMIT    :=    $(addsuffix -dirty,$(FZ_COMMIT))
 endif
 
-DIST_TARGET       =    $(OUT)/Fizeau-$(FZ_VERSION).zip
+DIST_TARGET       =    $(OUT)/Fizeau.zip
 
 # -----------------------------------------------
 
@@ -29,7 +29,7 @@ dist: $(DIST_TARGET)
 	@:
 
 $(DIST_TARGET): | all
-	@rm -rf $(OUT)/Fizeau-*.zip
+	@rm -rf $(OUT)/Fizeau.zip
 
 	@mkdir -p $(OUT)/config/Fizeau
 	@mkdir -p $(OUT)/switch/Fizeau
