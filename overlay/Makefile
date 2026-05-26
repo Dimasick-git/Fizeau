@@ -46,7 +46,7 @@ INCLUDES	:= include ../common/include ../lib/inih/include
 NO_ICON	    := 1
 
 # libryazhahand (fork of libultrahand with /config/ryazhahand/ namespace)
-include ${TOPDIR}/lib/libryazhahand/ryazhahand.mk
+include $(TOPDIR)/lib/libryazhahand/ryazhahand.mk
 
 #---------------------------------------------------------------------------------
 # options for code generation

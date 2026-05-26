@@ -19,19 +19,25 @@ DRY_RUN=false
 # ─── Protected files ───────────────────────────────────────────────────────
 # These are never overwritten from upstream (our custom code lives here).
 PROTECTED=(
-    # Overlay: complete rewrite with i18n + presets
+    # Overlay: complete rewrite — i18n, presets, full UI
     "overlay/src/main.cpp"
     "overlay/src/i18n.hpp"
     "overlay/src/presets.hpp"
     "overlay/Makefile"
-    # Library: we use libryazhahand, not libultrahand
+    # Library: libryazhahand replaces libultrahand
     "overlay/lib"
+    # Submodule config (libryazhahand instead of libultrahand)
     ".gitmodules"
-    # Build & CI
+    # Build: version, zip name, TOPDIR patching
     "Makefile"
+    # CI/CD: auto-release on main + tags, Fizeau.zip naming
     ".github"
-    # Docs
+    # Docs: full Russian rewrite
     "README.md"
+    # Sync state file
+    ".upstream-sync"
+    # This script itself
+    "sync-upstream.sh"
 )
 
 # ─── Patches always re-applied after merge ─────────────────────────────────

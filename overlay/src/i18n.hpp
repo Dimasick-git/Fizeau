@@ -74,4 +74,14 @@ namespace str {
     inline const char* FILTER_RED()       { return T("Красный",       "Red"); }
     inline const char* FILTER_GREEN()     { return T("Зелёный",       "Green"); }
     inline const char* FILTER_BLUE()      { return T("Синий",         "Blue"); }
+
+    // ── Built-in preset names ─────────────────────────────────────────────────
+    inline const char* PRESET_STANDARD()  { return T("Стандарт",     "Standard"); }
+    inline const char* PRESET_VIVID()     { return T("Яркий",        "Vivid"); }
+    inline const char* PRESET_SATURATED() { return T("Насыщенный",   "Saturated"); }
+    inline const char* PRESET_NIGHT()     { return T("Ночной",       "Night"); }
+    inline const char* PRESET_SOFT()      { return T("Мягкий",       "Soft"); }
+
+    // ── Custom preset auto-name prefix ────────────────────────────────────────
+    inline const char* PRESET_PREFIX()    { return T("Пресет",       "Preset"); }
 } // namespace str

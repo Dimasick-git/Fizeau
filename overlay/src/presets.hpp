@@ -5,6 +5,7 @@
 #include <vector>
 #include <cstdio>
 #include <types.h>
+#include "i18n.hpp"
 
 struct FzPreset {
     std::string name;
@@ -17,14 +18,16 @@ struct FzPreset {
     float       luminance;
 };
 
-// 5 built-in presets (day settings; same values applied to night on request)
-inline const std::vector<FzPreset> BUILTIN_PRESETS = {
-    { "Стандарт",   true, 6500, 1.00f, 0.00f, 1.00f, 2.40f,  0.00f },
-    { "Яркий",      true, 6500, 1.30f, 0.00f, 1.20f, 2.20f,  0.20f },
-    { "Насыщенный", true, 6500, 1.60f, 0.00f, 1.00f, 2.40f,  0.00f },
-    { "Ночной",     true, 3200, 0.90f, 0.00f, 0.90f, 2.60f, -0.10f },
-    { "Мягкий",     true, 5500, 0.80f, 0.00f, 0.90f, 2.50f, -0.10f },
-};
+// Returns built-in presets with names in the current UI language
+inline std::vector<FzPreset> getBuiltinPresets() {
+    return {
+        { str::PRESET_STANDARD(),  true, 6500, 1.00f, 0.00f, 1.00f, 2.40f,  0.00f },
+        { str::PRESET_VIVID(),     true, 6500, 1.30f, 0.00f, 1.20f, 2.20f,  0.20f },
+        { str::PRESET_SATURATED(), true, 6500, 1.60f, 0.00f, 1.00f, 2.40f,  0.00f },
+        { str::PRESET_NIGHT(),     true, 3200, 0.90f, 0.00f, 0.90f, 2.60f, -0.10f },
+        { str::PRESET_SOFT(),      true, 5500, 0.80f, 0.00f, 0.90f, 2.50f, -0.10f },
+    };
+}
 
 class PresetManager {
 public:
@@ -78,7 +81,7 @@ public:
     // Save current day/night settings as a new custom preset
     void saveCurrentAs(Temperature temp, float sat, float hue, float contrast, float gamma, float luminance) {
         FzPreset p;
-        p.name        = "Пресет " + std::to_string(this->custom.size() + 1);
+        p.name        = std::string(str::PRESET_PREFIX()) + " " + std::to_string(this->custom.size() + 1);
         p.is_builtin  = false;
         p.temperature = temp;
         p.saturation  = sat;

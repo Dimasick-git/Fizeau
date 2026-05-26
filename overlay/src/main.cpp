@@ -145,7 +145,7 @@ public:
         // Built-in presets
         list->addItem(new tsl::elm::CategoryHeader(str::BUILTIN_LABEL()));
 
-        for (const auto &p : BUILTIN_PRESETS) {
+        for (const auto &p : getBuiltinPresets()) {
             auto* btn = new tsl::elm::ListItem(p.name);
             btn->setValue(str::APPLY_PRESET());
             btn->setClickListener([this, p](std::uint64_t keys) {
