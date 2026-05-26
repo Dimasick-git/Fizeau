@@ -175,7 +175,7 @@ Result draw_profile_tab(Config &ctx) {
             return rc;
     }
 
-    im::SeparatorEx(ImGuiSeparatorFlags_Horizontal, 3.0f);
+    im::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
     im::TextUnformatted("Currently editing profile:");
     if (im::Combo("##editp", reinterpret_cast<int *>(&ctx.cur_profile_id), profile_names.data(), profile_names.size())) {
         if (auto rc = ctx.open_profile(ctx.cur_profile_id); R_FAILED(rc))

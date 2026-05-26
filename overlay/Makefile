@@ -84,7 +84,7 @@ CXXFLAGS := $(CFLAGS) -std=c++26 -fno-exceptions -ffunction-sections -fdata-sect
 ASFLAGS := $(ARCH)
 LDFLAGS += -specs=$(DEVKITPRO)/libnx/switch.specs $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS := -lcurl -lz -lminizip -lmbedtls -lmbedx509 -lmbedcrypto -lnx
+LIBS := -lcurl -lz -lminizip -lmbedtls -lmbedx509 -lmbedcrypto -lpng -lnx
 
 CXXFLAGS += -fno-exceptions -ffunction-sections -fdata-sections -fno-rtti
 LDFLAGS += -Wl,--gc-sections -Wl,--as-needed
