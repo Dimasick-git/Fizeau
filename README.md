@@ -15,7 +15,7 @@
 
 ---
 
-## Возможности v2.9.2
+## Возможности
 
 ### Основные
 - Управление цветом экрана через CMU Tegra в реальном времени
@@ -44,7 +44,7 @@
 
 ## Установка
 
-1. Скачай `Fizeau-2.9.2.zip` из [Releases](https://github.com/Dimasick-git/Fizeau/releases)
+1. Скачай актуальный `Fizeau-*.zip` из [Releases](https://github.com/Dimasick-git/Fizeau/releases)
 2. Распакуй архив в **корень SD-карты** (структура папок сохранится автоматически)
 3. Перезагрузи консоль
 4. Открой Fizeau через Ryazhahand (или любой другой Tesla-лаунчер)
@@ -83,7 +83,6 @@
 ### Требования
 - devkitA64 (devkitPro)
 - libnx
-- switch-glm
 
 ### Команды
 ```bash
@@ -91,13 +90,13 @@ git clone --recurse-submodules https://github.com/Dimasick-git/Fizeau.git
 cd Fizeau
 make -C common -j$(nproc)
 make dist -j$(nproc)
-# Результат: out/Fizeau-2.9.2.zip
+# Результат: out/Fizeau-*.zip
 ```
 
 ### Автоматический релиз
 ```bash
-git tag v2.9.2
-git push origin v2.9.2
+git tag v1.0.0
+git push origin v1.0.0
 # GitHub Actions соберёт и создаст релиз автоматически
 ```
 
