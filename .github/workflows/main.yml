@@ -58,12 +58,3 @@ jobs:
           generate_release_notes: true
           name: "Fizeau ${{ github.ref_name }}"
           fail_on_unmatched_files: true
-
-      - name: Publish latest release
-        if: github.ref == 'refs/heads/main'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: Fizeau.zip
-          tag_name: latest
-          name: "Fizeau (latest build)"
-          fail_on_unmatched_files: true
