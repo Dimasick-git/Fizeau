@@ -45,7 +45,8 @@ class Config {
         };
 
     public:
-        bool active = true, has_active_override = false;
+        // Safe first-run behavior: correction stays off until the user enables it explicitly.
+        bool active = false, has_active_override = false;
 
         FizeauProfileId cur_profile_id = FizeauProfileId_Invalid,
             internal_profile = FizeauProfileId_Profile1, external_profile = FizeauProfileId_Profile1;
