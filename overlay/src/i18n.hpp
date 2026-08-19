@@ -36,8 +36,11 @@ namespace str {
     inline const char* DOCKED()    { return T("Докстанция","Docked"); }
 
     // ── Category headers ──────────────────────────────────────────────────────
-    inline const char* DISPLAY_SETTINGS() { return T("Настройки экрана",   "Display Settings"); }
-    inline const char* DAYLIGHT_CYCLE()   { return T("Цикл освещения",     "Daylight Cycle"); }
+    inline const char* DISPLAY_SETTINGS() { return T("Основное",           "General"); }
+    inline const char* DAYLIGHT_CYCLE()   { return T("Режим дня и ночи",   "Day & Night"); }
+    inline const char* COLOR_SETTINGS()   { return T("Цвет",               "Color"); }
+    inline const char* IMAGE_SETTINGS()   { return T("Изображение",        "Picture"); }
+    inline const char* INTERFACE_SETTINGS(){ return T("Интерфейс",         "Interface"); }
     inline const char* DAY_START()        { return T("Начало дня",         "Day Start / Night End"); }
     inline const char* DAY_END()          { return T("Конец дня",          "Day End / Night Start"); }
     inline const char* DISPLAY_PROFILE()  { return T("Профиль экрана",     "Display Profile"); }

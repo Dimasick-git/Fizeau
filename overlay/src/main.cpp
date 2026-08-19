@@ -341,11 +341,17 @@ public:
     }
 
     virtual ~FizeauOverlayGui() {
-        if (this->pending_apply)
-            this->config.apply();
+        this->commit_pending_changes();
         this->save_period_overrides();
         this->config.write();
         fizeauExit();
+    }
+
+    virtual bool handleInput(u64 keysDown, u64, const HidTouchState &, HidAnalogStickState, HidAnalogStickState) override {
+        // B must leave the screen, never discard a value that the user has already changed.
+        if (keysDown & HidNpadButton_B)
+            this->commit_pending_changes();
+        return false;
     }
 
     bool compute_is_day() const {
@@ -601,12 +607,20 @@ public:
         return this->config.apply();
     }
 
+    void commit_pending_changes() {
+        if (!this->pending_apply)
+            return;
+
+        Result apply_rc = this->apply_with_override();
+        if (R_FAILED(apply_rc))
+            LOG("Failed to apply config: %#x\n", apply_rc);
+
+        this->pending_apply = false;
+        this->apply_counter = 0;
+    }
+
     void switch_profile(FizeauProfileId new_id) {
-        if (this->pending_apply) {
-            this->config.apply();
-            this->pending_apply = false;
-            this->apply_counter = 0;
-        }
+        this->commit_pending_changes();
 
         if (this->rc = this->config.open_profile(new_id); R_FAILED(this->rc))
             return;
@@ -934,7 +948,8 @@ public:
         lang_button->setClickListener([](std::uint64_t keys) {
             if (keys & HidNpadButton_A) {
                 g_lang = (g_lang == Lang::RU) ? Lang::EN : Lang::RU;
-                tsl::changeTo<FizeauOverlayGui>();
+                // Replace this screen instead of pushing another one: B returns normally.
+                tsl::swapTo<FizeauOverlayGui>();
                 return true;
             }
             return false;
@@ -968,23 +983,29 @@ public:
 
         this->display_settings_header = new tsl::elm::CategoryHeader(str::DISPLAY_SETTINGS());
         list->addItem(this->display_settings_header);
-        list->addItem(this->active_button);
-        list->addItem(this->reset_button);
-        list->addItem(presets_button);
-        list->addItem(lang_button);
         if (this->profile_bar)
             list->addItem(this->profile_bar);
+        list->addItem(this->active_button);
+        list->addItem(presets_button);
+        list->addItem(this->reset_button);
+
         this->daylight_header = new tsl::elm::CategoryHeader(str::DAYLIGHT_CYCLE());
         list->addItem(this->daylight_header);
         list->addItem(this->period_button);
         list->addItem(this->dawn_slider);
         list->addItem(this->dusk_slider);
+
+        this->color_settings_header = new tsl::elm::CategoryHeader(str::COLOR_SETTINGS());
+        list->addItem(this->color_settings_header);
         list->addItem(this->temp_header);
         list->addItem(this->temp_slider);
         list->addItem(this->sat_header);
         list->addItem(this->sat_slider);
         list->addItem(this->hue_header);
         list->addItem(this->hue_slider);
+
+        this->image_settings_header = new tsl::elm::CategoryHeader(str::IMAGE_SETTINGS());
+        list->addItem(this->image_settings_header);
         list->addItem(this->components_header);
         list->addItem(this->components_bar);
         list->addItem(this->filter_header);
@@ -996,6 +1017,10 @@ public:
         list->addItem(this->luma_header);
         list->addItem(this->luma_slider);
         list->addItem(this->range_button);
+
+        this->interface_header = new tsl::elm::CategoryHeader(str::INTERFACE_SETTINGS());
+        list->addItem(this->interface_header);
+        list->addItem(lang_button);
 
         auto* frame = new tsl::elm::OverlayFrame("Fizeau", VERSION);
         frame->setContent(list);
@@ -1024,14 +1049,8 @@ public:
 
         if (this->pending_apply) {
             this->apply_counter++;
-            if (this->apply_counter >= 3) {
-                Result apply_rc = this->apply_with_override();
-                if (R_FAILED(apply_rc)) {
-                    LOG("Failed to apply config: %#x\n", apply_rc);
-                }
-                this->pending_apply = false;
-                this->apply_counter = 0;
-            }
+            if (this->apply_counter >= 3)
+                this->commit_pending_changes();
         }
 
         this->temp_header->setValue(format("%u°K",
@@ -1079,6 +1098,9 @@ private:
         *components_header, *filter_header, *contrast_header, *gamma_header, *luma_header;
     tsl::elm::CategoryHeader *daylight_header         = nullptr;
     tsl::elm::CategoryHeader *display_settings_header = nullptr;
+    tsl::elm::CategoryHeader *color_settings_header   = nullptr;
+    tsl::elm::CategoryHeader *image_settings_header   = nullptr;
+    tsl::elm::CategoryHeader *interface_header        = nullptr;
 
     int  display_mode_poll_counter = 0;
     int  apply_counter;
