@@ -300,6 +300,7 @@ public:
             return;
 
         this->config.read();
+        fizeau_i18n::load_language();
         this->pad_config_to_four_profiles();
         this->num_profiles = count_profiles_in_config();
 
@@ -344,6 +345,7 @@ public:
         this->commit_pending_changes();
         this->save_period_overrides();
         this->config.write();
+        fizeau_i18n::save_language();
         fizeauExit();
     }
 
@@ -948,6 +950,8 @@ public:
         lang_button->setClickListener([](std::uint64_t keys) {
             if (keys & HidNpadButton_A) {
                 g_lang = (g_lang == Lang::RU) ? Lang::EN : Lang::RU;
+                // Write immediately so the choice also survives the B-driven screen swap.
+                fizeau_i18n::save_language();
                 // Replace this screen instead of pushing another one: B returns normally.
                 tsl::swapTo<FizeauOverlayGui>();
                 return true;

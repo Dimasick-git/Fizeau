@@ -2,10 +2,45 @@
 // RU by default; toggle via language button in overlay
 
 #pragma once
+#include <cstdint>
+#include <cstdio>
 #include <string_view>
 
 enum class Lang : std::uint8_t { RU = 0, EN = 1 };
 inline Lang g_lang = Lang::RU;
+
+namespace fizeau_i18n {
+
+// Kept separately from Fizeau's upstream config so a language choice cannot
+// interfere with the system-module configuration format.
+#ifndef FIZEAU_LANGUAGE_PATH
+#define FIZEAU_LANGUAGE_PATH "/config/fizeau/ui_language.ini"
+#endif
+inline constexpr const char* LANGUAGE_PATH = FIZEAU_LANGUAGE_PATH;
+
+inline void load_language() {
+    FILE* file = std::fopen(LANGUAGE_PATH, "r");
+    if (!file) return;
+
+    char value[8] = {};
+    if (std::fscanf(file, "language=%7s", value) == 1 &&
+        (value[0] == 'e' || value[0] == 'E')) {
+        g_lang = Lang::EN;
+    } else {
+        g_lang = Lang::RU;
+    }
+    std::fclose(file);
+}
+
+inline void save_language() {
+    FILE* file = std::fopen(LANGUAGE_PATH, "w");
+    if (!file) return;
+
+    std::fprintf(file, "language=%s\\n", g_lang == Lang::EN ? "en" : "ru");
+    std::fclose(file);
+}
+
+} // namespace fizeau_i18n
 
 // T(russian, english) — returns the string for the active language
 #define T(ru, en) (g_lang == Lang::RU ? (ru) : (en))
