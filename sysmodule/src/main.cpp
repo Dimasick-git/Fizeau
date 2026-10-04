@@ -83,7 +83,7 @@ void __appInit(void) {
     if (auto rc = nvInitialize(); R_FAILED(rc))
         diagAbortWithResult(rc);
 
-    if (auto rc = ommInitialize(); R_FAILED(rc))
+    if (auto rc = fizeauOmmInitialize(); R_FAILED(rc))
         diagAbortWithResult(rc);
 
     if (auto rc = insrInitialize(); R_FAILED(rc))
@@ -100,7 +100,7 @@ void __appInit(void) {
 
 void __appExit(void) {
     nvExit();
-    ommExit();
+    fizeauOmmExit();
     insrExit();
 
 #if defined(DEBUG) && defined(TWILI)

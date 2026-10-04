@@ -35,6 +35,17 @@ jobs:
       - name: Fix git safe.directory
         run: git config --global --add safe.directory '*'
 
+      - name: Update devkitPro toolchain
+        run: dkp-pacman -Syu --noconfirm
+
+      - name: Build libnx 4.12.0
+        run: |
+          git clone --depth 1 --branch v4.12.0 https://github.com/switchbrew/libnx.git "$RUNNER_TEMP/libnx"
+          test "$(git -C "$RUNNER_TEMP/libnx" rev-parse HEAD)" = "7644c9b26099aa2d2145bc72a21ee24190e92085"
+          make -C "$RUNNER_TEMP/libnx" -j"$(nproc)"
+          make -C "$RUNNER_TEMP/libnx" install
+          aarch64-none-elf-gcc --version
+
       - name: Build common library
         run: make -C common -j$(nproc)
 

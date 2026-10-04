@@ -20,11 +20,38 @@
 #include <switch.h>
 
 #define NX_SERVICE_ASSUME_NON_DOMAIN
+#include "service_guard.h"
 #include "omm.h"
 
-Result ommGetOperationModeChangeEvent(Event *out, bool autoclear) {
+static Service g_ommSrv;
+
+NX_GENERATE_SERVICE_GUARD(fizeauOmm);
+
+Result _fizeauOmmInitialize(void) {
+    return smGetService(&g_ommSrv, "omm");
+}
+
+void _fizeauOmmCleanup(void) {
+    serviceClose(&g_ommSrv);
+}
+
+Service* fizeauOmmGetServiceSession(void) {
+    return &g_ommSrv;
+}
+
+Result fizeauOmmGetOperationMode(AppletOperationMode *mode) {
+    u8 tmp;
+
+    Result rc = serviceDispatchOut(&g_ommSrv, 0, tmp);
+    if (R_SUCCEEDED(rc) && mode)
+        *mode = tmp;
+
+    return rc;
+}
+
+Result fizeauOmmGetOperationModeChangeEvent(Event *out, bool autoclear) {
     Handle evt_handle = INVALID_HANDLE;
-    Result rc = serviceDispatch(ommGetServiceSession(), 1,
+    Result rc = serviceDispatch(&g_ommSrv, 1,
         .out_handle_attrs = { SfOutHandleAttr_HipcCopy },
         .out_handles = &evt_handle,
     );

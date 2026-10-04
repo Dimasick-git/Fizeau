@@ -84,7 +84,7 @@ void ProfileManager::transition_thread_func(void *args) {
         if (!self->context.is_active)
             continue;
 
-        bool need_apply = false, is_handheld = self->operation_mode == OmmOperationMode_Handheld;
+        bool need_apply = false, is_handheld = self->operation_mode == AppletOperationMode_Handheld;
 
         // CMU resets
         if (!need_apply) {
@@ -174,7 +174,7 @@ void ProfileManager::event_monitor_thread_func(void *args) {
 
         switch (idx) {
             case 0: {
-                ommGetOperationMode(&self->operation_mode);
+                fizeauOmmGetOperationMode(&self->operation_mode);
                 break;
             }
             case 1: {
@@ -196,10 +196,10 @@ Result ProfileManager::initialize() {
     if (auto rc = svcQueryMemoryMapping(&this->disp_va_base, &size, DISP_IO_BASE, DISP_IO_SIZE); R_FAILED(rc))
         diagAbortWithResult(rc);
 
-    if (auto rc = ommGetOperationModeChangeEvent(&this->operation_mode_event, false); R_FAILED(rc))
+    if (auto rc = fizeauOmmGetOperationModeChangeEvent(&this->operation_mode_event, false); R_FAILED(rc))
         diagAbortWithResult(rc);
 
-    if (auto rc = ommGetOperationMode(&this->operation_mode); R_FAILED(rc))
+    if (auto rc = fizeauOmmGetOperationMode(&this->operation_mode); R_FAILED(rc))
         diagAbortWithResult(rc);
 
     if (auto rc = insrGetReadableEvent(ins_evt_id, &this->activity_event); R_FAILED(rc))
@@ -296,7 +296,7 @@ Result ProfileManager::apply() {
     bool should_dim_internal = should_dim(this->context.internal_profile, timeout);
     bool should_dim_external = should_dim(this->context.external_profile, timeout);
 
-    auto is_handheld = this->operation_mode == OmmOperationMode_Handheld;
+    auto is_handheld = this->operation_mode == AppletOperationMode_Handheld;
     this->is_dimming = is_handheld ? should_dim_internal : should_dim_external;
 
     mutexLock(&this->commit_mutex);

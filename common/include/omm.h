@@ -29,7 +29,11 @@
 extern "C" {
 #endif
 
-Result ommGetOperationModeChangeEvent(Event *out, bool autoclear);
+Result fizeauOmmInitialize(void);
+void fizeauOmmExit();
+
+Result fizeauOmmGetOperationMode(AppletOperationMode *mode);
+Result fizeauOmmGetOperationModeChangeEvent(Event *out, bool autoclear);
 
 #ifdef __cplusplus
 } // extern "C"
