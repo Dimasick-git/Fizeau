@@ -49,6 +49,18 @@ jobs:
       - name: Build distribution package
         run: make dist -j$(nproc)
 
+      - name: Verify package
+        run: |
+          python3 - <<'PY'
+          import zipfile
+          with zipfile.ZipFile('out/Fizeau.zip') as archive:
+              assert archive.testzip() is None
+              overlay = archive.read('switch/.overlays/Fizeau.ovl')
+              assert overlay[16:20] == b'NRO0'
+              assert overlay[-4:] == b'RYZH'
+              assert archive.read('atmosphere/contents/0100000000000F12/exefs.nsp')[:4] == b'PFS0'
+          PY
+
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
