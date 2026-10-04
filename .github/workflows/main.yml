@@ -44,7 +44,7 @@ jobs:
           test "$(git -C "$RUNNER_TEMP/libnx" rev-parse HEAD)" = "7644c9b26099aa2d2145bc72a21ee24190e92085"
           make -C "$RUNNER_TEMP/libnx" -j"$(nproc)"
           make -C "$RUNNER_TEMP/libnx" install
-          aarch64-none-elf-gcc --version
+          "$DEVKITPRO/devkitA64/bin/aarch64-none-elf-gcc" --version
 
       - name: Build common library
         run: make -C common -j$(nproc)
