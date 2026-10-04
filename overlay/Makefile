@@ -38,7 +38,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 APP_TITLE	:= Fizeau
 APP_AUTHOR	:= Dimasick
-APP_VERSION	:= $(if $(FZ_VERSION),$(FZ_VERSION),2.9.3)
+APP_VERSION	:= $(if $(FZ_VERSION),$(FZ_VERSION),2.9.4)
 TARGET	    := Fizeau
 BUILD	    := build
 SOURCES	    := src ../common/src ../lib/inih/inih

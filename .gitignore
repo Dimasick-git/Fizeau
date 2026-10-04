@@ -1,0 +1,12 @@
+**/build/
+**/out/
+*.o
+*.a
+*.elf
+*.nro
+*.ovl
+*.nsp
+*.nso
+*.npdm
+*.nacp
+*.dksh

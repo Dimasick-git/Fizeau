@@ -16,6 +16,7 @@
 #include <common.hpp>
 #include "i18n.hpp"
 #include "presets.hpp"
+#include "ui.hpp"
 
 #ifdef DEBUG
 TwiliPipe g_twlPipe;
@@ -53,13 +54,12 @@ public:
     virtual tsl::elm::Element *createUI() override {
         auto* frame = new tsl::elm::OverlayFrame("Fizeau", VERSION, false);
 
-        auto* drawer = new tsl::elm::CustomDrawer([](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
-            renderer->drawString(str::SERVICE_NOT_ACTIVE_1(), false, x + 16, y +  80, 20, (0xffff));
-            renderer->drawString(str::SERVICE_NOT_ACTIVE_2(), false, x + 16, y + 110, 20, (0xffff));
-            renderer->drawString(str::SERVICE_NOT_ACTIVE_3(), false, x + 16, y + 130, 20, (0xffff));
-        });
-
-        frame->setContent(drawer);
+        auto* list = new tsl::elm::List();
+        list->addItem(new tsl::elm::CompactCategoryHeader("Fizeau"));
+        list->addItem(new tsl::elm::CompactDescription(str::SERVICE_NOT_ACTIVE_1()));
+        list->addItem(new tsl::elm::CompactDescription(
+            format("%s %s", str::SERVICE_NOT_ACTIVE_2(), str::SERVICE_NOT_ACTIVE_3())));
+        frame->setContent(list);
 
         #if USING_WIDGET_DIRECTIVE
         frame->m_showWidget = true;
@@ -84,17 +84,15 @@ public:
     virtual tsl::elm::Element *createUI() override {
         auto* frame = new tsl::elm::OverlayFrame("Fizeau", VERSION, false);
 
-        auto* drawer = new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
-            renderer->drawString(format("%#x (%04d-%04d)", this->rc, R_MODULE(this->rc) + 2000, R_DESCRIPTION(this->rc)).c_str(),
-                                                                         false, x, y +  50, 20, (0xffff));
-            renderer->drawString(str::ERROR_OCCURRED(),     false, x, y +  80, 20, (0xffff));
-            renderer->drawString(str::ERROR_USE_LATEST_1(), false, x, y + 110, 20, (0xffff));
-            renderer->drawString(str::ERROR_USE_LATEST_2(), false, x, y + 130, 20, (0xffff));
-            renderer->drawString(str::ERROR_REPORT(),       false, x, y + 150, 20, (0xffff));
-            renderer->drawString("https://github.com/Dimasick-git/Fizeau", false, x, y + 170, 18, (0xffff));
-        });
-
-        frame->setContent(drawer);
+        auto* list = new tsl::elm::List();
+        list->addItem(new tsl::elm::CompactCategoryHeader(str::ERROR_OCCURRED()));
+        list->addItem(new tsl::elm::CompactDescription(
+            format("%#x (%04d-%04d)", this->rc, R_MODULE(this->rc) + 2000, R_DESCRIPTION(this->rc))));
+        list->addItem(new tsl::elm::CompactDescription(
+            format("%s %s", str::ERROR_USE_LATEST_1(), str::ERROR_USE_LATEST_2())));
+        list->addItem(new tsl::elm::CompactDescription(str::ERROR_REPORT()));
+        list->addItem(new tsl::elm::CompactListItem("GitHub", "Dimasick-git/Fizeau"));
+        frame->setContent(list);
 
         #if USING_WIDGET_DIRECTIVE
         frame->m_showWidget = true;
@@ -129,13 +127,13 @@ public:
         auto* list  = new tsl::elm::List();
 
         // Save current settings as new preset
-        auto* save_btn = new tsl::elm::ListItem(str::SAVE_CURRENT());
+        auto* save_btn = new tsl::elm::CompactListItem(str::SAVE_CURRENT());
         save_btn->setClickListener([this](std::uint64_t keys) {
             if (keys & HidNpadButton_A) {
-                auto &ds = *this->day_settings;
+                auto &ds = *(this->is_day && !*this->is_day ? this->night_settings : this->day_settings);
                 g_presets.saveCurrentAs(ds.temperature, ds.saturation,
                                         ds.hue, ds.contrast, ds.gamma, ds.luminance);
-                tsl::changeTo<PresetsGui>(this->day_settings, this->night_settings, this->is_day, this->config);
+                tsl::swapTo<PresetsGui>(this->day_settings, this->night_settings, this->is_day, this->config);
                 return true;
             }
             return false;
@@ -143,10 +141,10 @@ public:
         list->addItem(save_btn);
 
         // Built-in presets
-        list->addItem(new tsl::elm::CategoryHeader(str::BUILTIN_LABEL()));
+        list->addItem(new tsl::elm::CompactCategoryHeader(str::BUILTIN_LABEL()));
 
         for (const auto &p : getBuiltinPresets()) {
-            auto* btn = new tsl::elm::ListItem(p.name);
+            auto* btn = new tsl::elm::CompactListItem(p.name);
             btn->setValue(str::APPLY_PRESET());
             btn->setClickListener([this, p](std::uint64_t keys) {
                 if (keys & HidNpadButton_A) {
@@ -161,10 +159,10 @@ public:
 
         // Custom presets
         if (!g_presets.custom.empty()) {
-            list->addItem(new tsl::elm::CategoryHeader(str::CUSTOM_LABEL()));
+            list->addItem(new tsl::elm::CompactCategoryHeader(str::CUSTOM_LABEL()));
             for (std::size_t i = 0; i < g_presets.custom.size(); ++i) {
                 const auto &p = g_presets.custom[i];
-                auto* btn = new tsl::elm::ListItem(p.name);
+                auto* btn = new tsl::elm::CompactListItem(p.name);
                 btn->setValue(str::APPLY_DEL_PRESET());
                 btn->setClickListener([this, i](std::uint64_t keys) {
                     if (keys & HidNpadButton_A) {
@@ -175,7 +173,7 @@ public:
                     }
                     if (keys & HidNpadButton_X) {
                         g_presets.removeCustom(i);
-                        tsl::changeTo<PresetsGui>(this->day_settings, this->night_settings, this->is_day, this->config);
+                        tsl::swapTo<PresetsGui>(this->day_settings, this->night_settings, this->is_day, this->config);
                         return true;
                     }
                     return false;
@@ -239,13 +237,13 @@ struct ProfilePeriodState {
 };
 
 // ── TimeStepTrackBar ──────────────────────────────────────────────────────────
-class TimeStepTrackBar : public tsl::elm::StepTrackBar {
+class TimeStepTrackBar : public ui::StepTrackBar {
 public:
     static constexpr std::size_t kNumSteps = 25;
     static constexpr int         kMaxHour  = static_cast<int>(kNumSteps) - 1;
 
     explicit TimeStepTrackBar(const std::string &label)
-        : tsl::elm::StepTrackBar("", kNumSteps, true, true, label) {
+        : ui::StepTrackBar("", kNumSteps, true, true, label) {
         this->TrackBar::m_numSteps = kNumSteps;
         this->m_selection = "00:00";
     }
@@ -278,10 +276,10 @@ public:
 };
 
 // ── DynamicProfileTrackBar ────────────────────────────────────────────────────
-class DynamicProfileTrackBar : public tsl::elm::NamedStepTrackBar {
+class DynamicProfileTrackBar : public ui::NamedStepTrackBar {
 public:
     DynamicProfileTrackBar(std::vector<std::string> labels, const std::string &title)
-        : tsl::elm::NamedStepTrackBar("", { "" }, true, title, true) {
+        : ui::NamedStepTrackBar("", { "" }, true, title, true) {
         this->m_stepDescriptions = std::move(labels);
         const u8 n = static_cast<u8>(this->m_stepDescriptions.size());
         this->m_numSteps           = n;
@@ -643,11 +641,6 @@ public:
     }
 
     virtual tsl::elm::Element *createUI() override {
-        this->info_header = new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
-            renderer->drawString(format(str::PERIOD_FMT(), this->is_day ? str::PERIOD_DAY() : str::PERIOD_NIGHT()).c_str(),
-                false, x, y + 20, 20, (0xffff));
-        });
-
         // Profile bar (multi-profile only)
         if (this->num_profiles > 1) {
             std::vector<std::string> labels;
@@ -664,7 +657,7 @@ public:
         }
 
         // Correction toggle
-        this->active_button = new tsl::elm::ListItem(str::CORRECTION_STATE());
+        this->active_button = new tsl::elm::CompactListItem(str::CORRECTION_STATE());
         this->active_button->setClickListener([this](std::uint64_t keys) {
             if (keys & HidNpadButton_A) {
                 this->config.active ^= 1;
@@ -677,7 +670,7 @@ public:
         this->active_button->setValue(this->config.active ? str::ACTIVE() : str::INACTIVE());
 
         // Period mode cycle: Авто → День → Ночь → Авто
-        this->period_button = new tsl::elm::ListItem(str::PERIOD_MODE());
+        this->period_button = new tsl::elm::CompactListItem(str::PERIOD_MODE());
         this->period_button->setClickListener([this](std::uint64_t keys) {
             if (keys & HidNpadButton_A) {
                 auto id = this->config.cur_profile_id;
@@ -744,7 +737,7 @@ public:
         });
 
         // Reset button
-        this->reset_button = new tsl::elm::ListItem(str::RESET_SETTINGS());
+        this->reset_button = new tsl::elm::CompactListItem(str::RESET_SETTINGS());
         this->reset_button->setClickListener([this](std::uint64_t keys) {
             if (keys & HidNpadButton_A) {
                 auto reset_f = [](FizeauSettings &s) {
@@ -770,7 +763,7 @@ public:
         });
 
         // Temperature
-        this->temp_slider = new tsl::elm::TrackBar("");
+        this->temp_slider = new ui::TrackBar("");
         this->temp_slider->setProgress(((this->is_day ? this->config.profile.day_settings.temperature : this->config.profile.night_settings.temperature) - MIN_TEMP)
             * 100 / ((this->allow_high_temp ? MAX_TEMP : D65_TEMP) - MIN_TEMP));
         this->temp_slider->setClickListener([&, this](std::uint64_t keys) {
@@ -790,7 +783,7 @@ public:
         });
 
         // Saturation
-        this->sat_slider = new tsl::elm::TrackBar("");
+        this->sat_slider = new ui::TrackBar("");
         this->sat_slider->setProgress(((this->is_day ? this->config.profile.day_settings.saturation : this->config.profile.night_settings.saturation) - MIN_SAT)
             * 100 / (MAX_SAT - MIN_SAT));
         this->sat_slider->setClickListener([this](std::uint64_t keys) {
@@ -810,7 +803,7 @@ public:
         });
 
         // Hue
-        this->hue_slider = new tsl::elm::TrackBar("");
+        this->hue_slider = new ui::TrackBar("");
         this->hue_slider->setProgress(((this->is_day ? this->config.profile.day_settings.hue : this->config.profile.night_settings.hue) - MIN_HUE)
             * 100 / (MAX_HUE - MIN_HUE));
         this->hue_slider->setClickListener([this](std::uint64_t keys) {
@@ -830,7 +823,7 @@ public:
         });
 
         // Components
-        this->components_bar = new tsl::elm::NamedStepTrackBar("", {
+        this->components_bar = new ui::NamedStepTrackBar("", {
             str::COMP_NONE(), "R", "G", "RG", "B", "RB", "GB", str::COMP_ALL() });
         this->components_bar->setProgress(static_cast<u8>(this->config.profile.components));
         this->components_bar->setClickListener([this](std::uint64_t keys) {
@@ -849,7 +842,7 @@ public:
         });
 
         // Filter
-        this->filter_bar = new tsl::elm::NamedStepTrackBar("", {
+        this->filter_bar = new ui::NamedStepTrackBar("", {
             str::FILTER_NONE(), str::FILTER_RED(), str::FILTER_GREEN(), str::FILTER_BLUE() });
         this->filter_bar->setProgress((this->config.profile.filter == Component_None) ? 0 : std::countr_zero(static_cast<std::uint32_t>(this->config.profile.filter)) + 1);
         this->filter_bar->setClickListener([this](std::uint64_t keys) {
@@ -868,7 +861,7 @@ public:
         });
 
         // Contrast
-        this->contrast_slider = new tsl::elm::TrackBar("");
+        this->contrast_slider = new ui::TrackBar("");
         this->contrast_slider->setProgress(((this->is_day ? this->config.profile.day_settings.contrast : this->config.profile.night_settings.contrast) - MIN_CONTRAST)
             * 100 / (MAX_CONTRAST - MIN_CONTRAST));
         this->contrast_slider->setClickListener([this](std::uint64_t keys) {
@@ -888,7 +881,7 @@ public:
         });
 
         // Gamma
-        this->gamma_slider = new tsl::elm::TrackBar("");
+        this->gamma_slider = new ui::TrackBar("");
         this->gamma_slider->setProgress(((this->is_day ? this->config.profile.day_settings.gamma : this->config.profile.night_settings.gamma) - MIN_GAMMA)
             * 100 / (MAX_GAMMA - MIN_GAMMA));
         this->gamma_slider->setClickListener([this](std::uint64_t keys) {
@@ -908,7 +901,7 @@ public:
         });
 
         // Luminance
-        this->luma_slider = new tsl::elm::TrackBar("");
+        this->luma_slider = new ui::TrackBar("");
         this->luma_slider->setProgress(((this->is_day ? this->config.profile.day_settings.luminance : this->config.profile.night_settings.luminance) - MIN_LUMA)
             * 100 / (MAX_LUMA - MIN_LUMA));
         this->luma_slider->setClickListener([this](std::uint64_t keys) {
@@ -928,7 +921,7 @@ public:
         });
 
         // Color range
-        this->range_button = new tsl::elm::ListItem(str::COLOR_RANGE());
+        this->range_button = new tsl::elm::CompactListItem(str::COLOR_RANGE());
         this->range_button->setClickListener([this](std::uint64_t keys) {
             if (keys & HidNpadButton_A) {
                 auto &range = (this->is_day ? this->config.profile.day_settings.range : this->config.profile.night_settings.range);
@@ -946,7 +939,7 @@ public:
         this->range_button->setValue(is_full(this->is_day ? this->config.profile.day_settings.range : this->config.profile.night_settings.range) ? str::FULL() : str::LIMITED());
 
         // Language toggle (RU ↔ EN) — rebuilds full UI so all strings update
-        auto* lang_button = new tsl::elm::ListItem(str::LANGUAGE());
+        auto* lang_button = new tsl::elm::CompactListItem(str::LANGUAGE());
         lang_button->setClickListener([](std::uint64_t keys) {
             if (keys & HidNpadButton_A) {
                 g_lang = (g_lang == Lang::RU) ? Lang::EN : Lang::RU;
@@ -960,7 +953,7 @@ public:
         });
 
         // Presets button
-        auto* presets_button = new tsl::elm::ListItem(str::PRESETS_MENU());
+        auto* presets_button = new tsl::elm::CompactListItem(str::PRESETS_MENU());
         presets_button->setClickListener([this](std::uint64_t keys) {
             if (keys & HidNpadButton_A) {
                 tsl::changeTo<PresetsGui>(
@@ -974,18 +967,18 @@ public:
         });
 
         // Category headers
-        this->temp_header       = new tsl::elm::CategoryHeader(str::TEMPERATURE());
-        this->sat_header        = new tsl::elm::CategoryHeader(str::SATURATION());
-        this->hue_header        = new tsl::elm::CategoryHeader(str::HUE());
-        this->components_header = new tsl::elm::CategoryHeader(str::COMPONENTS());
-        this->filter_header     = new tsl::elm::CategoryHeader(str::FILTER());
-        this->contrast_header   = new tsl::elm::CategoryHeader(str::CONTRAST());
-        this->gamma_header      = new tsl::elm::CategoryHeader(str::GAMMA());
-        this->luma_header       = new tsl::elm::CategoryHeader(str::LUMINANCE());
+        this->temp_header       = new tsl::elm::CompactCategoryHeader(str::TEMPERATURE());
+        this->sat_header        = new tsl::elm::CompactCategoryHeader(str::SATURATION());
+        this->hue_header        = new tsl::elm::CompactCategoryHeader(str::HUE());
+        this->components_header = new tsl::elm::CompactCategoryHeader(str::COMPONENTS());
+        this->filter_header     = new tsl::elm::CompactCategoryHeader(str::FILTER());
+        this->contrast_header   = new tsl::elm::CompactCategoryHeader(str::CONTRAST());
+        this->gamma_header      = new tsl::elm::CompactCategoryHeader(str::GAMMA());
+        this->luma_header       = new tsl::elm::CompactCategoryHeader(str::LUMINANCE());
 
         auto* list = new tsl::elm::List();
 
-        this->display_settings_header = new tsl::elm::CategoryHeader(str::DISPLAY_SETTINGS());
+        this->display_settings_header = new tsl::elm::CompactCategoryHeader(str::DISPLAY_SETTINGS());
         list->addItem(this->display_settings_header);
         if (this->profile_bar)
             list->addItem(this->profile_bar);
@@ -993,13 +986,13 @@ public:
         list->addItem(presets_button);
         list->addItem(this->reset_button);
 
-        this->daylight_header = new tsl::elm::CategoryHeader(str::DAYLIGHT_CYCLE());
+        this->daylight_header = new tsl::elm::CompactCategoryHeader(str::DAYLIGHT_CYCLE());
         list->addItem(this->daylight_header);
         list->addItem(this->period_button);
         list->addItem(this->dawn_slider);
         list->addItem(this->dusk_slider);
 
-        this->color_settings_header = new tsl::elm::CategoryHeader(str::COLOR_SETTINGS());
+        this->color_settings_header = new tsl::elm::CompactCategoryHeader(str::COLOR_SETTINGS());
         list->addItem(this->color_settings_header);
         list->addItem(this->temp_header);
         list->addItem(this->temp_slider);
@@ -1008,7 +1001,7 @@ public:
         list->addItem(this->hue_header);
         list->addItem(this->hue_slider);
 
-        this->image_settings_header = new tsl::elm::CategoryHeader(str::IMAGE_SETTINGS());
+        this->image_settings_header = new tsl::elm::CompactCategoryHeader(str::IMAGE_SETTINGS());
         list->addItem(this->image_settings_header);
         list->addItem(this->components_header);
         list->addItem(this->components_bar);
@@ -1022,7 +1015,7 @@ public:
         list->addItem(this->luma_slider);
         list->addItem(this->range_button);
 
-        this->interface_header = new tsl::elm::CategoryHeader(str::INTERFACE_SETTINGS());
+        this->interface_header = new tsl::elm::CompactCategoryHeader(str::INTERFACE_SETTINGS());
         list->addItem(this->interface_header);
         list->addItem(lang_button);
 
@@ -1081,7 +1074,6 @@ private:
     ApmPerformanceMode perf_mode = ApmPerformanceMode_Normal;
     Config config = {};
 
-    tsl::elm::CustomDrawer      *info_header             = nullptr;
     DynamicProfileTrackBar      *profile_bar             = nullptr;
     tsl::elm::ListItem          *active_button           = nullptr;
     tsl::elm::ListItem          *period_button           = nullptr;
@@ -1126,6 +1118,7 @@ private:
 
 public:
     virtual void initServices() override {
+        fizeau_i18n::load_language();
 #ifdef DEBUG
         twiliInitialize();
         twiliCreateNamedOutputPipe(&g_twlPipe, "fzovlout");

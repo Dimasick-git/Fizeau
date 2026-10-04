@@ -36,7 +36,7 @@ inline void save_language() {
     FILE* file = std::fopen(LANGUAGE_PATH, "w");
     if (!file) return;
 
-    std::fprintf(file, "language=%s\\n", g_lang == Lang::EN ? "en" : "ru");
+    std::fprintf(file, "language=%s\n", g_lang == Lang::EN ? "en" : "ru");
     std::fclose(file);
 }
 

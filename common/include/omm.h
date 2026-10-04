@@ -29,10 +29,6 @@
 extern "C" {
 #endif
 
-Result ommInitialize(void);
-void ommExit();
-
-Result ommGetOperationMode(AppletOperationMode *mode);
 Result ommGetOperationModeChangeEvent(Event *out, bool autoclear);
 
 #ifdef __cplusplus
