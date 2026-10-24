@@ -46,6 +46,9 @@ INCLUDES	:= include ../common/include ../lib/inih/include
 NO_ICON	    := 1
 
 # libryazhahand (fork of libultrahand with /config/ryazhahand/ namespace)
+# Glass under the UI (libryazhahand libglass): the GPU presents the frame over a live blurred game frame.
+USING_GLASS_DIRECTIVE := 1
+
 include $(TOPDIR)/lib/libryazhahand/ryazhahand.mk
 
 #---------------------------------------------------------------------------------
