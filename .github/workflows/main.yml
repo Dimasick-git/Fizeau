@@ -7,7 +7,7 @@ defaults:
 on:
   push:
     branches: ['**']
-    tags: ['v*']
+    tags: ['v*', '*-deko3d']
   pull_request:
 
 permissions:
@@ -82,7 +82,7 @@ jobs:
   release:
     name: Publish release
     needs: build
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -109,8 +109,7 @@ jobs:
           tag_name: ${{ steps.tag.outputs.tag }}
           name: Fizeau ${{ steps.tag.outputs.tag }}
           generate_release_notes: false
-          body: |
-            Обновлена libryazhahand. Компактный текст и элементы в оверлее. Исправлено сохранение ночных пресетов и возврат из меню. Интерфейс Fizeau.nro сохранён.
+          body_path: docs/RELEASE_NOTES_DEKO3D.md
           files: Fizeau.zip
           fail_on_unmatched_files: true
           draft: false
